@@ -1,6 +1,10 @@
-# A simple NodeJS based mock server
+# A simple NodeJS based mock server with support of kafka producer
 
 ## Usage
+
+```
+npm install
+```
 
 ```
 node index.js
@@ -32,4 +36,10 @@ Change value of delay according to use. No type check is or error handling is do
 
 ```
 http://localhost:7000/error/500
+```
+
+### Produce Basic Kafka Event
+
+```
+http://localhost:7000/produce
 ```

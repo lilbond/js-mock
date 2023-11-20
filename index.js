@@ -2,6 +2,67 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
+const kafka = require('kafka-node');
+
+const KafkaConfig = {
+	topic: 'tenant.config.events',
+	server: 'localhost:29092',
+};
+
+const MessageMeta = {
+	T: 't1',
+	C: 'c1',
+	O: 'o1',
+	D: {
+		A: 'a',
+		B: 'b',
+	},
+};
+
+class KafkaMessageProducer {
+	getKey = () => {
+		return MessageMeta.T + '~' + MessageMeta.C + '~' + MessageMeta.O;
+	};
+	produce = () => {
+		try {
+			const Producer = kafka.Producer;
+			const client = new kafka.KafkaClient({
+				kafkaHost: KafkaConfig.server,
+				requestTimeout: 1000,
+				connectTimeout: 1000,
+			});
+			const producer = new Producer(client);
+
+			let payloads = [
+				{
+					topic: KafkaConfig.topic,
+					messages: JSON.stringify(MessageMeta),
+					key: this.getKey(),
+				},
+			];
+
+			producer.on('ready', async function () {
+				producer.send(payloads, (err, data) => {
+					if (err) {
+						console.log(err);
+						throw err;
+					} else {
+						console.log('Send Success');
+					}
+				});
+			});
+
+			producer.on('error', function (err) {
+				console.log(err);
+				throw err;
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	};
+}
+
+const kafkaMessageProducer = new KafkaMessageProducer();
 
 class Dispatcher {
 	constructor() {
@@ -10,7 +71,14 @@ class Dispatcher {
 		this.mapping['/greetings'] = this._greetings;
 		this.mapping['/delayed'] = this._delayed;
 		this.mapping['/error/500'] = this._serverError;
+		this.mapping['/produce'] = this._produce;
 	}
+
+	_produce = (req, res) => {
+		let success = kafkaMessageProducer.produce();
+		res.writeHead(200, { 'Content-Type': 'application/json' });
+		res.end(JSON.stringify({ result: 'Initiated' }));
+	};
 
 	_mock = (req, res) => {
 		const filePath = path.join(__dirname, '/data', req.url + '.json');
