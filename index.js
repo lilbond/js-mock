@@ -10,10 +10,10 @@ const KafkaConfig = {
 };
 
 const MessageMeta = {
-	T: 't1',
-	C: 'c1',
-	O: 'o1',
-	D: {
+	tenantId: 't1',
+	configType: 'c1',
+	operation: 'o1',
+	config: {
 		A: 'a',
 		B: 'b',
 	},
@@ -21,7 +21,13 @@ const MessageMeta = {
 
 class KafkaMessageProducer {
 	getKey = () => {
-		return MessageMeta.T + '~' + MessageMeta.C + '~' + MessageMeta.O;
+		return (
+			MessageMeta.tenantId +
+			'~' +
+			MessageMeta.configType +
+			'~' +
+			MessageMeta.operation
+		);
 	};
 	produce = () => {
 		try {
