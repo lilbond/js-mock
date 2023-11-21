@@ -11,7 +11,7 @@ const KafkaConfig = {
 
 const MessageMeta = {
 	tenantId: 't1',
-	configType: 'c1',
+	configType: 'RateLimiter',
 	operation: 'o1',
 	config: {
 		A: 'a',
